@@ -43,7 +43,6 @@ export class Map {
 			this.floorSet.add(this.floorKey(xTiles, yTiles))
 		}
 
-		console.log("rendering")
 		const isEven = (xTiles + yTiles) % 2 === 0;
 		const color: [number, number, number, number] = isEven
 			? [0.9725, 0.9686, 1.0, 1.0]   // light tile
@@ -57,7 +56,6 @@ export class Map {
 			solid: false,
 			type: TILE
 		}
-		console.log("xTiles", xTiles, "yTiles", yTiles, "structure.x", structure.x, "structure.y", structure.y);
 
 		this._structures.push(structure)
 		this.checkWall()
@@ -121,7 +119,6 @@ export class Map {
 				solid: true,
 				type: WALL,
 			}
-			console.log(wall)
 			return wall
 		}
 		if (dir === "E") {
@@ -133,7 +130,6 @@ export class Map {
 				solid: true,
 				type: WALL,
 			}
-			console.log(wall)
 			return wall
 		}
 		if (dir === "S") {
@@ -145,7 +141,6 @@ export class Map {
 				solid: true,
 				type: WALL,
 			}
-			console.log(wall)
 			return wall
 		}
 		if (dir === "W") {
@@ -157,7 +152,6 @@ export class Map {
 				solid: true,
 				type: WALL,
 			}
-			console.log(wall)
 			return wall
 		}
 		return null

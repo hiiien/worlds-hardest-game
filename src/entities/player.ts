@@ -1,104 +1,110 @@
-import { createSquare } from "../map/shared";
-import { Entity, MapStructure } from "../types/types";
+// entities/Player.ts
+import { Transform } from './transform';
+import { Movement } from './movement';
+import { Renderable } from './renderable';
+import { Collider } from './collider';
+import { createSquare } from '../map/geometry';
+import { MapStructure } from '../types/types';
 
 export class Player {
-	private shape: number[] = []
-	x: number
-	y: number
-	private size: number
-	private color: [number, number, number, number]
-	private speed: number
-	public directionMap: Record<string, boolean>
+	private transform: Transform;
+	private movement: Movement;
+	private renderable: Renderable;
+	private collider: Collider;
+	private readonly size = 20;
+	private readonly speed = 200;
 
 	constructor(x: number, y: number, color: [number, number, number, number]) {
-		this.x = x
-		this.y = y
-		this.size = 20
-		this.shape = createSquare(this.size)
-		this.color = color
-		this.speed = 200
-		this.directionMap = {
-			"w": false,
-			"a": false,
-			"s": false,
-			"d": false,
-		}
+		this.transform = new Transform(x, y);
+		this.movement = new Movement(this.speed); // 200 units per second
+		this.renderable = new Renderable(createSquare(this.size), color);
+		this.collider = new Collider(this.size, this.size);
 	}
 
-	updatePos(deltaTime: number, canvasHeight: number, canvasWidth: number, walls: MapStructure[]): Entity {
-		let inputX = 0
-		let inputY = 0
-
-		if (this.directionMap["a"]) inputX -= 1;
-		if (this.directionMap["d"]) inputX += 1;
-		if (this.directionMap["w"]) inputY -= 1;
-		if (this.directionMap["s"]) inputY += 1;
-
-		const newX = this.x + (inputX * this.speed * deltaTime)
-		const newY = this.y + (inputY * this.speed * deltaTime)
-		const xCollided = this.wouldCollide(newX, this.y, canvasWidth, canvasHeight, walls)
-		const yCollided = this.wouldCollide(this.x, newY, canvasWidth, canvasHeight, walls)
-		if (!xCollided) {
-			this.x = newX
-		}
-		if (!yCollided) {
-			this.y = newY
-		}
-
-		return {
-			x: this.x,
-			y: this.y,
-			color: this.color,
-			shape: this.shape,
-		} satisfies Entity
+	get directionMap() {
+		return this.movement.directionMap;
 	}
 
-	private wouldCollide(newX: number, newY: number, canvasWidth: number, canvasHeight: number, walls: MapStructure[]): boolean {
-		const playerLeft = newX
-		const playerRight = newX + this.size
-		const playerTop = newY
-		const playerBottom = newY + this.size
+	updatePos(
+		deltaTime: number,
+		canvasHeight: number,
+		canvasWidth: number,
+		structures: MapStructure[]
+	) {
+		const oldX = this.transform.x;
+		const oldY = this.transform.y;
+		const velocity = this.movement.calculateVelocity(deltaTime);
 
-		if (playerRight > canvasWidth || playerLeft < 0 || playerBottom > canvasHeight || playerTop < 0) {
-			return true
-		}
+		this.transform.x += velocity.x;
 
-		for (const wall of walls) {
-			if (!wall.solid) continue;
-
-			const wallWidth = this.getShapeWidth(wall.shape)
-			const wallHeight = this.getShapeHeight(wall.shape)
-
-			const wallLeft = wall.x
-			const wallRight = wall.x + wallWidth
-			const wallTop = wall.y
-			const wallBottom = wall.y + wallHeight
-
-			if (playerRight > wallLeft &&
-				playerLeft < wallRight &&
-				playerBottom > wallTop &&
-				playerTop < wallBottom) {
-				return true
+		let xCollision = false;
+		for (const structure of structures) {
+			if (structure.solid && this.checkCollisionWithStructure(structure)) {
+				xCollision = true;
+				break;
 			}
 		}
-		return false
+
+		if (xCollision) {
+			this.transform.x = oldX; // Revert X movement only
+		}
+
+		// Try Y movement
+		this.transform.y += velocity.y;
+
+		// Check Y-axis collision
+		let yCollision = false;
+		for (const structure of structures) {
+			if (structure.solid && this.checkCollisionWithStructure(structure)) {
+				yCollision = true;
+				break;
+			}
+		}
+
+		if (yCollision) {
+			this.transform.y = oldY; // Revert Y movement only
+		}
+
+		// Clamp to canvas bounds
+		this.collider.clampToBounds(this.transform, canvasWidth, canvasHeight);
+
+		// Return renderable data
+		return {
+			x: this.transform.x,
+			y: this.transform.y,
+			shape: this.renderable.shape,
+			color: this.renderable.color,
+			vertexCount: this.renderable.vertexCount
+		};
 	}
 
-	private getShapeWidth(shape: number[]): number {
-		let minX = Infinity, maxX = -Infinity
+	setDirection(key: string, pressed: boolean): void {
+		this.movement.setDirection(key, pressed);
+	}
+
+	private checkCollisionWithStructure(structure: MapStructure): boolean {
+		const structureWidth = this.getStructureWidth(structure.shape);
+		const structureHeight = this.getStructureHeight(structure.shape);
+
+		const structureCollider = new Collider(structureWidth, structureHeight, structure.solid);
+		const structureTransform = new Transform(structure.x, structure.y);
+
+		return this.collider.intersects(structureCollider, this.transform, structureTransform);
+	}
+
+	private getStructureWidth(shape: number[]): number {
+		let maxX = -Infinity;
 		for (let i = 0; i < shape.length; i += 2) {
-			minX = Math.min(minX, shape[i])
-			maxX = Math.max(maxX, shape[i])
+			maxX = Math.max(maxX, shape[i]);
 		}
-		return maxX - minX
+		return maxX;
 	}
 
-	private getShapeHeight(shape: number[]): number {
-		let minY = Infinity, maxY = -Infinity
+	private getStructureHeight(shape: number[]): number {
+		let maxY = -Infinity;
 		for (let i = 1; i < shape.length; i += 2) {
-			minY = Math.min(minY, shape[i])
-			maxY = Math.max(maxY, shape[i])
+			maxY = Math.max(maxY, shape[i]);
 		}
-		return maxY - minY
+		return maxY;
 	}
 }

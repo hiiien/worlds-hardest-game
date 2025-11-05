@@ -1,11 +1,18 @@
 import { Map } from "../map/map";
+import { Player } from "../entities/player";
 
 export class Input {
 	private mouseDown = false;
 	private ctrlDown = false;
-	constructor(private canvas: HTMLCanvasElement, private map: Map) {
+
+	constructor(
+		private canvas: HTMLCanvasElement,
+		private map: Map,
+		private player: Player
+	) {
 		this.setupHandlers();
 	}
+
 	private setupHandlers(): void {
 		window.addEventListener("mousedown", (e) => this.handleMouseDown(e));
 		window.addEventListener("mousemove", (e) => this.handleMouseMove(e));
@@ -13,47 +20,57 @@ export class Input {
 		window.addEventListener("keydown", (e) => this.handleKeyDown(e));
 		window.addEventListener("keyup", (e) => this.handleKeyUp(e));
 	}
+
 	private handleMouseDown(e: MouseEvent): void {
 		this.mouseDown = true;
 		const { x, y } = this.getCanvasCoordinates(e);
+
 		if (this.ctrlDown) {
 			this.map.handleCtrlDown(x, y);
 		} else {
 			this.map.handleClick(x, y, this.canvas.width, this.canvas.height);
 		}
 	}
+
 	private handleMouseMove(e: MouseEvent): void {
 		if (!this.mouseDown) return;
+
 		const { x, y } = this.getCanvasCoordinates(e);
+
 		if (this.ctrlDown) {
 			this.map.handleCtrlDown(x, y);
 		} else {
 			this.map.handleClick(x, y, this.canvas.width, this.canvas.height);
 		}
 	}
-	handleMouseUp(): void {
+
+	private handleMouseUp(): void {
 		this.mouseDown = false;
 	}
-	handleKeyDown(e: KeyboardEvent): void {
+
+	private handleKeyDown(e: KeyboardEvent): void {
 		const key = e.key.toLowerCase();
+		this.player.setDirection(key, true);
+
 		if (e.key === "Control") {
 			this.ctrlDown = true;
 		}
 	}
-	handleKeyUp(e: KeyboardEvent): void {
+
+	private handleKeyUp(e: KeyboardEvent): void {
 		const key = e.key.toLowerCase();
+		this.player.setDirection(key, false);
+
 		if (e.key === "Control") {
 			this.ctrlDown = false;
 		}
 	}
 
-
-	private getCanvasCoordinates(e: MouseEvent): { x: number, y: number } {
+	private getCanvasCoordinates(e: MouseEvent): { x: number; y: number } {
 		const rect = this.canvas.getBoundingClientRect();
 		return {
 			x: e.clientX - rect.left,
-			y: e.clientY - rect.top,
-		}
+			y: e.clientY - rect.top
+		};
 	}
-
 }

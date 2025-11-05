@@ -1,5 +1,5 @@
-import vertexShaderSource from "./shader/vertex.glsl";
-import fragmentShaderSource from "./shader/fragment.glsl";
+import vertexShaderSource from "./shaders/vertex.glsl";
+import fragmentShaderSource from "./shaders/fragment.glsl";
 import { MapStructure } from "../types/types";
 import { ShaderManager } from "./shaderManager";
 import { BufferManager } from "./bufferManager";

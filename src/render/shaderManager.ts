@@ -14,7 +14,6 @@ export class ShaderManager {
 		const vertexShader = this.compileShader(gl.VERTEX_SHADER, vertexSource);
 		const fragmentShader = this.compileShader(gl.FRAGMENT_SHADER, fragmentSource);
 		this.program = this.linkProgram(vertexShader, fragmentShader);
-
 		this.locations = {
 			position: gl.getAttribLocation(this.program, "a_position"),
 			resolution: gl.getUniformLocation(this.program, "u_resolution")!,
@@ -26,7 +25,6 @@ export class ShaderManager {
 		const shader = this.gl.createShader(type)!;
 		this.gl.shaderSource(shader, source);
 		this.gl.compileShader(shader);
-
 		if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
 			const info = this.gl.getShaderInfoLog(shader);
 			this.gl.deleteShader(shader);
@@ -41,7 +39,6 @@ export class ShaderManager {
 		this.gl.attachShader(program, vertexShader);
 		this.gl.attachShader(program, fragmentShader);
 		this.gl.linkProgram(program);
-
 		if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
 			const info = this.gl.getProgramInfoLog(program);
 			this.gl.deleteProgram(program);

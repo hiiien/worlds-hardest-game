@@ -16,7 +16,7 @@ export class Player {
 
 	constructor(x: number, y: number, color: [number, number, number, number]) {
 		this.transform = new Transform(x, y);
-		this.movement = new Movement(this.speed); // 200 units per second
+		this.movement = new Movement(this.speed);
 		this.renderable = new Renderable(createSquare(this.size), color);
 		this.collider = new Collider(this.size, this.size);
 	}
@@ -27,8 +27,8 @@ export class Player {
 
 	updatePos(
 		deltaTime: number,
-		canvasHeight: number,
-		canvasWidth: number,
+		canvasWidth: number,     // ✅ Fixed order: width first
+		canvasHeight: number,    // ✅ Then height
 		structures: MapStructure[]
 	) {
 		const oldX = this.transform.x;
@@ -46,13 +46,11 @@ export class Player {
 		}
 
 		if (xCollision) {
-			this.transform.x = oldX; // Revert X movement only
+			this.transform.x = oldX;
 		}
 
-		// Try Y movement
 		this.transform.y += velocity.y;
 
-		// Check Y-axis collision
 		let yCollision = false;
 		for (const structure of structures) {
 			if (structure.solid && this.checkCollisionWithStructure(structure)) {
@@ -62,13 +60,12 @@ export class Player {
 		}
 
 		if (yCollision) {
-			this.transform.y = oldY; // Revert Y movement only
+			this.transform.y = oldY;
 		}
 
-		// Clamp to canvas bounds
+		// Now the order matches clampToBounds
 		this.collider.clampToBounds(this.transform, canvasWidth, canvasHeight);
 
-		// Return renderable data
 		return {
 			x: this.transform.x,
 			y: this.transform.y,

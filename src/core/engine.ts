@@ -1,5 +1,5 @@
 // engine.ts
-import { Renderer } from "../renderer/renderer";
+import { Renderer } from "../render/renderer";
 import { Map } from "../map/map";
 import { Player } from "../entities/player";
 import { Input } from "./input";

@@ -16,7 +16,7 @@ window.onload = async (): Promise<void> => {
 	canvas.height = 500;
 
 	renderer = new Renderer(canvas);
-	player = new Player(50, 50, 50, [1, 0, 0, 1])
+	player = new Player(50, 50, [1, 0, 0, 1])
 	map = new Map();
 	await renderer.initialize();
 	setupInputHandlers()
@@ -85,7 +85,7 @@ async function render(): Promise<void> {
 	if (mapStructures && mapStructures.length > 0) {
 		renderer.drawStructures(mapStructures)
 	}
-	const playerFrame = player.updatePos(deltaTime)
+	const playerFrame = player.updatePos(deltaTime, canvas!.height, canvas!.width, map!.MapStructures)
 	renderer.drawEntities([playerFrame]);
 
 	requestAnimationFrame(() => render());

@@ -12,7 +12,7 @@ export class Map {
 	private wallShortSide: number;
 	constructor() {
 		this.borderMargin = 50
-		this.tileSize = 50
+		this.tileSize = 25
 		this._structures = []
 		this.walls = []
 		this.wallLongSide = this.tileSize

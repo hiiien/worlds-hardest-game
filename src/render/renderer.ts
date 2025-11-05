@@ -59,6 +59,19 @@ export class Renderer {
 		}
 	}
 
+	private drawStructure(structure: MapStructure): void {
+		const vertices = this.getTransformedVertices(structure);
+
+		// Use dynamic buffer instead of static buffer
+		this.bufferManager.updateDynamicBuffer(new Float32Array(vertices));
+
+		const color = structure.color ?? [1, 0, 0, 1];
+		this.shaderManager.setColor(color);
+
+		const vertexCount = vertices.length / 2;
+		this.gl.drawArrays(this.gl.TRIANGLES, 0, vertexCount);
+	}
+
 	private startFrame(): void {
 		this.shaderManager.use();
 		this.shaderManager.setResolution(this.gl.canvas.width, this.gl.canvas.height);
@@ -82,26 +95,6 @@ export class Renderer {
 		this.gl.drawArrays(this.gl.TRIANGLES, 0, vertexCount);
 	}
 
-	private drawStructure(structure: MapStructure): void {
-		const vertices = this.getTransformedVertices(structure);
-
-		this.bufferManager.bindStaticBuffer();
-		this.gl.vertexAttribPointer(
-			this.shaderManager.locations.position,
-			2,
-			this.gl.FLOAT,
-			false,
-			0,
-			0
-		);
-		this.bufferManager.updateStaticBuffer(new Float32Array(vertices));
-
-		const color = structure.color ?? [1, 0, 0, 1];
-		this.shaderManager.setColor(color);
-
-		const vertexCount = vertices.length / 2;
-		this.gl.drawArrays(this.gl.TRIANGLES, 0, vertexCount);
-	}
 
 	private getTransformedVertices(entity: { x: number; y: number; shape: number[] }): number[] {
 		const transformed: number[] = [];

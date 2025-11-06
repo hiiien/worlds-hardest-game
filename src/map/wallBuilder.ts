@@ -1,5 +1,6 @@
-import { MapStructure, WALL } from "../types/types";
-import { createRectangle, createSquare } from "./geometry";
+import { MapStructure } from "../types/types";
+import { StructureTypeConstants } from "../constants";
+import { createRectangle } from "./geometry";
 import { TileManager } from "./tileManager";
 
 export class WallBuilder {
@@ -54,7 +55,7 @@ export class WallBuilder {
 			...config,
 			color: [0, 0, 0, 1],
 			solid: true,
-			type: WALL,
+			type: StructureTypeConstants.WALL,
 		} as MapStructure
 	}
 }

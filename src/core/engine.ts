@@ -61,9 +61,9 @@ export class Engine {
 		}
 
 		const playerFrame = this.player.updatePos(
-			deltaTime,  // ✅ CORRECT - Use deltaTime instead of this.lastTime
-			this.canvas.height,
+			deltaTime,
 			this.canvas.width,
+			this.canvas.height,
 			this.map.MapStructures
 		);
 

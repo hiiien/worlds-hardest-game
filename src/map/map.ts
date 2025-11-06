@@ -1,4 +1,5 @@
-import { MapStructure, TILE } from "../types/types";
+import { MapStructure, TileType } from "../types/types";
+import { StructureTypeConstants } from "../constants";
 import { createSquare } from "./geometry";
 import { TileManager } from "./tileManager";
 import { WallBuilder } from "./wallBuilder";
@@ -47,6 +48,15 @@ export class Map {
 			}
 		}
 	}
+	handleEditorChange(tileType: string): void {
+		if (tileType === StructureTypeConstants.SAVE_TILE) {
+			this.tileManager.setTileEditorType(StructureTypeConstants.SAVE_TILE);
+		} else if (tileType === StructureTypeConstants.FINISH_TILE) {
+			this.tileManager.setTileEditorType(StructureTypeConstants.FINISH_TILE);
+		} else if (tileType === StructureTypeConstants.FLOOR_TILE) {
+			this.tileManager.setTileEditorType(StructureTypeConstants.FLOOR_TILE);
+		}
+	}
 
 	private regenerateStructures(): void {
 		const tiles = this.generateTiles();
@@ -59,9 +69,19 @@ export class Map {
 
 		for (const [x, y] of this.tileManager.getAllTile()) {
 			const isEven = (x + y) % 2 === 0;
-			const color: [number, number, number, number] = isEven
-				? [0.9725, 0.9686, 1.0, 1.0]
-				: [0.8588, 0.8353, 0.9725, 1.0];
+			const tileType = this.tileManager.getTileWithType(x, y);
+
+			// Handle null case - provide default values if tile type not found
+			const type = tileType ? tileType[2] : StructureTypeConstants.FLOOR_TILE;
+
+			let color: [number, number, number, number];
+			if (type === StructureTypeConstants.SAVE_TILE) {
+				color = [0, 0, 1, 1];
+			} else {
+				color = isEven
+					? [0.9725, 0.9686, 1.0, 1.0]
+					: [0.8588, 0.8353, 0.9725, 1.0];
+			}
 
 			tiles.push({
 				x: x * this.tileManager.tileSize,
@@ -69,7 +89,7 @@ export class Map {
 				shape: createSquare(this.tileManager.tileSize),
 				color,
 				solid: false,
-				type: TILE
+				type: type
 			});
 		}
 

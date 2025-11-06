@@ -19,6 +19,15 @@ export class Input {
 		window.addEventListener("mouseup", () => this.handleMouseUp());
 		window.addEventListener("keydown", (e) => this.handleKeyDown(e));
 		window.addEventListener("keyup", (e) => this.handleKeyUp(e));
+
+		const dropdown = document.querySelector<HTMLSelectElement>('#myDropdown');
+		if (dropdown) {
+			dropdown.addEventListener('change', (e) => {
+				const select = e.currentTarget as HTMLSelectElement; // typed, non-null
+				console.log(select.value)
+				this.map.handleEditorChange(select.value);
+			});
+		}
 	}
 
 	private handleMouseDown(e: MouseEvent): void {

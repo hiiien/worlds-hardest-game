@@ -1,14 +1,10 @@
-
-export const TILE = 'tile'
-export const WALL = 'wall'
-
+import { StructureTypeConstants } from "../constants";
+export type TileType = StructureTypeConstants.FLOOR_TILE | StructureTypeConstants.SAVE_TILE | StructureTypeConstants.FINISH_TILE
 export interface MapStructure {
 	x: number;
 	y: number;
 	shape: number[];
-	//solid is for whether you can go through the object or not
-	//i.e is it a wall or floor
-	type: string;
+	type: string | null;
 	solid: boolean;
 	color?: [number, number, number, number]
 }

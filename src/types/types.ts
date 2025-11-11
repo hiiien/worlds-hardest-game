@@ -1,5 +1,5 @@
 import { StructureTypeConstants } from "../constants";
-export type TileType = StructureTypeConstants.FLOOR_TILE | StructureTypeConstants.SAVE_TILE | StructureTypeConstants.FINISH_TILE
+export type TileType = StructureTypeConstants.FLOOR_TILE | StructureTypeConstants.SAVE_TILE | StructureTypeConstants.FINISH_TILE | StructureTypeConstants.START_TILE;
 export interface MapStructure {
 	x: number;
 	y: number;
@@ -14,6 +14,7 @@ export interface Entity {
 	x: number;
 	y: number;
 	shape: number[];
+	entityType: string;
 	color?: [number, number, number, number];
 	vertexCount?: number;
 }

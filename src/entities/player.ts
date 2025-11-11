@@ -5,6 +5,7 @@ import { Renderable } from './renderable';
 import { Collider } from './collider';
 import { createSquare } from '../map/geometry';
 import { MapStructure } from '../types/types';
+import { StructureTypeConstants, TILE_SIZE } from '../constants';
 
 export class Player {
 	private transform: Transform;
@@ -13,6 +14,7 @@ export class Player {
 	private collider: Collider;
 	private readonly size = 20;
 	private readonly speed = 200;
+	private lastSavePoint: { x: number, y: number }
 
 	constructor(x: number, y: number, color: [number, number, number, number]) {
 		this.transform = new Transform(x, y);
@@ -27,8 +29,8 @@ export class Player {
 
 	updatePos(
 		deltaTime: number,
-		canvasWidth: number,     // ✅ Fixed order: width first
-		canvasHeight: number,    // ✅ Then height
+		canvasWidth: number,
+		canvasHeight: number,
 		structures: MapStructure[]
 	) {
 		const oldX = this.transform.x;
@@ -65,10 +67,64 @@ export class Player {
 
 		// Now the order matches clampToBounds
 		this.collider.clampToBounds(this.transform, canvasWidth, canvasHeight);
+		const saveCornerArray: [boolean, boolean, boolean, boolean] = [false, false, false, false];
+
+		for (const structure of structures) {
+			if (
+				structure.type !== StructureTypeConstants.SAVE_TILE &&
+				structure.type !== StructureTypeConstants.FINISH_TILE &&
+				structure.type !== StructureTypeConstants.START_TILE
+			) {
+				continue;
+			}
+			if (
+				this.transform.x >= structure.x &&
+				this.transform.x <= structure.x + TILE_SIZE &&
+				this.transform.y >= structure.y &&
+				this.transform.y <= structure.y + TILE_SIZE
+			) {
+				saveCornerArray[0] = true;
+			}
+			if (
+				this.transform.x + this.size >= structure.x &&
+				this.transform.x + this.size <= structure.x + TILE_SIZE &&
+				this.transform.y >= structure.y &&
+				this.transform.y <= structure.y + TILE_SIZE
+			) {
+				saveCornerArray[1] = true;
+			}
+			if (
+				this.transform.x >= structure.x &&
+				this.transform.x <= structure.x + TILE_SIZE &&
+				this.transform.y + this.size >= structure.y &&
+				this.transform.y + this.size <= structure.y + TILE_SIZE
+			) {
+				saveCornerArray[2] = true;
+			}
+			if (
+				this.transform.x + this.size >= structure.x &&
+				this.transform.x + this.size <= structure.x + TILE_SIZE &&
+				this.transform.y + this.size >= structure.y &&
+				this.transform.y + this.size <= structure.y + TILE_SIZE
+			) {
+				saveCornerArray[3] = true;
+			}
+		}
+		let saveCorner = true;
+		for (const corner of saveCornerArray) {
+			if (!corner) {
+				saveCorner = false;
+				break;
+			}
+		}
+		if (saveCorner) {
+			this.lastSavePoint = { x: this.transform.x, y: this.transform.y };
+		}
 
 		return {
 			x: this.transform.x,
 			y: this.transform.y,
+			entityType: "player",
 			shape: this.renderable.shape,
 			color: this.renderable.color,
 			vertexCount: this.renderable.vertexCount
@@ -77,6 +133,21 @@ export class Player {
 
 	setDirection(key: string, pressed: boolean): void {
 		this.movement.setDirection(key, pressed);
+	}
+
+	findStartingPosition(structures: MapStructure[]): void {
+		for (const structure of structures) {
+			if (structure.type === StructureTypeConstants.START_TILE) {
+				this.transform.x = structure.x;
+				this.transform.y = structure.y;
+				this.lastSavePoint = { x: structure.x, y: structure.y };
+				return;
+			}
+		}
+	}
+	repawnPlayer() {
+		this.transform.x = this.lastSavePoint.x;
+		this.transform.y = this.lastSavePoint.y;
 	}
 
 	private checkCollisionWithStructure(structure: MapStructure): boolean {

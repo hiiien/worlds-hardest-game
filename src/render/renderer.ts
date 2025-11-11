@@ -1,6 +1,6 @@
 import vertexShaderSource from "./shaders/vertex.glsl";
 import fragmentShaderSource from "./shaders/fragment.glsl";
-import { MapStructure } from "../types/types";
+import { Entity, MapStructure } from "../types/types";
 import { ShaderManager } from "./shaderManager";
 import { BufferManager } from "./bufferManager";
 
@@ -78,13 +78,7 @@ export class Renderer {
 		this.bufferManager.bind();
 	}
 
-	private drawEntity(entity: {
-		x: number;
-		y: number;
-		shape: number[];
-		color?: [number, number, number, number];
-		vertexCount?: number;
-	}): void {
+	private drawEntity(entity: Entity): void {
 		const vertices = this.getTransformedVertices(entity);
 		this.bufferManager.updateDynamicBuffer(new Float32Array(vertices));
 
@@ -92,7 +86,8 @@ export class Renderer {
 		this.shaderManager.setColor(color);
 
 		const vertexCount = entity.vertexCount ?? vertices.length / 2;
-		this.gl.drawArrays(this.gl.TRIANGLES, 0, vertexCount);
+		const renderType = (entity.entityType === "player") ? this.gl.TRIANGLES : this.gl.TRIANGLE_FAN
+		this.gl.drawArrays(renderType, 0, vertexCount);
 	}
 
 

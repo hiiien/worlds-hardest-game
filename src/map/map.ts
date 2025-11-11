@@ -1,4 +1,4 @@
-import { MapStructure, TileType } from "../types/types";
+import { MapStructure } from "../types/types";
 import { StructureTypeConstants } from "../constants";
 import { createSquare } from "./geometry";
 import { TileManager } from "./tileManager";
@@ -55,6 +55,8 @@ export class Map {
 			this.tileManager.setTileEditorType(StructureTypeConstants.FINISH_TILE);
 		} else if (tileType === StructureTypeConstants.FLOOR_TILE) {
 			this.tileManager.setTileEditorType(StructureTypeConstants.FLOOR_TILE);
+		} else if (tileType === StructureTypeConstants.START_TILE) {
+			this.tileManager.setTileEditorType(StructureTypeConstants.START_TILE);
 		}
 	}
 
@@ -75,8 +77,8 @@ export class Map {
 			const type = tileType ? tileType[2] : StructureTypeConstants.FLOOR_TILE;
 
 			let color: [number, number, number, number];
-			if (type === StructureTypeConstants.SAVE_TILE) {
-				color = [0, 0, 1, 1];
+			if (type === StructureTypeConstants.SAVE_TILE || type === StructureTypeConstants.FINISH_TILE || type === StructureTypeConstants.START_TILE) {
+				color = [0.6196, 0.9490, 0.6078, 1];
 			} else {
 				color = isEven
 					? [0.9725, 0.9686, 1.0, 1.0]

@@ -1,5 +1,6 @@
 import { Map } from "../map/map";
 import { Player } from "../entities/player";
+import { Engine } from "../core/engine";
 
 export class Input {
 	private mouseDown = false;
@@ -8,7 +9,8 @@ export class Input {
 	constructor(
 		private canvas: HTMLCanvasElement,
 		private map: Map,
-		private player: Player
+		private player: Player,
+		private engine: Engine
 	) {
 		this.setupHandlers();
 	}
@@ -28,9 +30,26 @@ export class Input {
 				this.map.handleEditorChange(select.value);
 			});
 		}
+		const toggleButton = document.querySelector('#toggle-mode');
+		if (toggleButton) {
+			toggleButton.addEventListener('click', () => {
+				this.player.findStartingPosition(this.map.MapStructures);
+				this.engine.toggleGameState();
+
+			});
+		}
+		const resetButton = document.querySelector('#reset');
+		if (resetButton) {
+			resetButton.addEventListener('click', () => {
+				this.player.repawnPlayer();
+			});
+		}
 	}
 
 	private handleMouseDown(e: MouseEvent): void {
+		if (this.engine.getGameState() !== "edit") {
+			return;
+		}
 		this.mouseDown = true;
 		const { x, y } = this.getCanvasCoordinates(e);
 
@@ -43,6 +62,9 @@ export class Input {
 
 	private handleMouseMove(e: MouseEvent): void {
 		if (!this.mouseDown) return;
+		if (this.engine.getGameState() !== "edit") {
+			return;
+		}
 
 		const { x, y } = this.getCanvasCoordinates(e);
 
@@ -54,25 +76,33 @@ export class Input {
 	}
 
 	private handleMouseUp(): void {
+		if (this.engine.getGameState() !== "edit") {
+			return;
+		}
 		this.mouseDown = false;
 	}
 
 	private handleKeyDown(e: KeyboardEvent): void {
-		const key = e.key.toLowerCase();
-		this.player.setDirection(key, true);
-
 		if (e.key === "Control") {
 			this.ctrlDown = true;
 		}
+		if (this.engine.getGameState() !== "play") {
+			return;
+		}
+		const key = e.key.toLowerCase();
+		this.player.setDirection(key, true);
 	}
 
 	private handleKeyUp(e: KeyboardEvent): void {
-		const key = e.key.toLowerCase();
-		this.player.setDirection(key, false);
-
 		if (e.key === "Control") {
 			this.ctrlDown = false;
 		}
+		if (this.engine.getGameState() !== "play") {
+			return;
+		}
+		const key = e.key.toLowerCase();
+		this.player.setDirection(key, false);
+
 	}
 
 	private getCanvasCoordinates(e: MouseEvent): { x: number; y: number } {

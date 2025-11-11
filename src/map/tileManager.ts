@@ -8,7 +8,6 @@ export class TileManager {
 
 	setTileEditorType(type: TileType): void {
 		this.tileEditorType = type
-		console.log(this.tileEditorType)
 	}
 
 	addTile(x: number, y: number): boolean {
@@ -17,7 +16,6 @@ export class TileManager {
 			return false
 		}
 		this.tileTypeMap.set(key, this.tileEditorType)
-		console.log(this.tileTypeMap)
 		this.tiles.add(key)
 		return true
 	}
@@ -45,13 +43,11 @@ export class TileManager {
 		return null
 	}
 	getTileWithType(x: number, y: number): [number, number, string] | null {
-		const tile = this.getTileAt(x, y);
-		if (!tile) return null;
+		const key = this.getKey(x, y);
+		if (!this.tiles.has(key)) return null;
 
-		const [tileX, tileY] = tile;
-		const key = this.getKey(tileX, tileY);
 		const type = this.tileTypeMap.get(key);
-		return type ? [tileX, tileY, type] : null;
+		return type ? [x, y, type] : null;
 	}
 
 	getAllTile(): Array<[number, number]> {
@@ -72,6 +68,7 @@ export class TileManager {
 		const [fx, fy] = key.split(",").map(Number)
 		return [fx, fy]
 	}
+
 
 	clear(): void {
 		this.tiles.clear()

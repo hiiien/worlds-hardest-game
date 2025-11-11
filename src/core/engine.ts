@@ -3,20 +3,24 @@ import { Renderer } from "../render/renderer";
 import { Map } from "../map/map";
 import { Player } from "../entities/player";
 import { Input } from "./input";
+import { Enemy } from "../entities/enemies";
 
 export class Engine {
 	private renderer: Renderer;
 	private map: Map;
 	private player: Player;
+	private enemies: Enemy;
 	private inputManager: Input;
 	private lastTime = 0;
 	private running = false;
+	private gamestate: string = "edit"
 
 	constructor(private canvas: HTMLCanvasElement) {
 		this.renderer = new Renderer(canvas);
 		this.map = new Map();
 		this.player = new Player(50, 50, [1, 0, 0, 1]);
-		this.inputManager = new Input(canvas, this.map, this.player);
+		this.inputManager = new Input(canvas, this.map, this.player, this);
+		this.enemies = new Enemy();
 	}
 
 	async initialize(): Promise<void> {
@@ -33,6 +37,18 @@ export class Engine {
 
 	stop(): void {
 		this.running = false;
+	}
+
+	getGameState(): string {
+		return this.gamestate;
+	}
+
+	toggleGameState(): void {
+		if (this.gamestate === "play") {
+			this.gamestate = "edit";
+		} else {
+			this.gamestate = "play";
+		}
 	}
 
 	private gameLoop(): void {
@@ -67,7 +83,14 @@ export class Engine {
 			this.map.MapStructures
 		);
 
-		this.renderer.drawEntities([playerFrame]);
+		const enemies = this.enemies.getEnemies();
+		console.log(enemies);
+
+		if (this.gamestate === "play") {
+			this.renderer.drawEntities([playerFrame, ...enemies]);
+		} else {
+			this.renderer.drawEntities([]);
+		}
 	}
 
 	dispose(): void {

@@ -5,5 +5,6 @@ export enum StructureTypeConstants {
 	FLOOR_TILE = 'tile',
 	WALL = 'wall',
 	SAVE_TILE = 'savePoint',
-	FINISH_TILE = 'finishPoint'
+	FINISH_TILE = 'finishPoint',
+	START_TILE = 'startPoint'
 }
